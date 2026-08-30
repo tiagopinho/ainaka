@@ -10,7 +10,7 @@ export const localeOptions: { code: Locale; flag: string; short: string; label: 
   { code: 'fr-FR', flag: '🇫🇷', short: 'FR', label: 'Français (France)' },
 ]
 
-const translations: Record<Locale, Record<string, string>> = {
+export const defaultTranslations: Record<Locale, Record<string, string>> = {
   'pt-BR': {
     'nav.services':'Serviços','nav.about':'Sobre','nav.portfolio':'Portfólio','nav.contact':'Contato','nav.cta':'Fale conosco','nav.open':'Abrir menu','nav.language':'Selecionar idioma',
     'hero.badge':'Ideias audaciosas. Tecnologia sem limites.','hero.title1':'Criamos o digital que','hero.title2':'ninguém ignora.','hero.text':'Sites, landing pages, aplicativos e sistemas sob medida que transformam ideias em experiências digitais memoráveis.','hero.cta':'Tire sua ideia do papel','hero.projects':'Explorar projetos','hero.logo':'Símbolo AINAKA',
@@ -52,13 +52,39 @@ const translations: Record<Locale, Record<string, string>> = {
   },
 }
 
-const I18nContext = createContext<{ locale: Locale; setLocale: (locale: Locale) => void; t: (key: string) => string } | null>(null)
+export const contentSections = [
+  { title: 'Navegação', keys: ['nav.services','nav.about','nav.portfolio','nav.contact','nav.cta'] },
+  { title: 'Abertura (Hero)', keys: ['hero.badge','hero.title1','hero.title2','hero.text','hero.cta','hero.projects'] },
+  { title: 'Serviços — introdução', keys: ['services.eyebrow','services.title','services.description'] },
+  ...Array.from({ length: 6 }, (_, index) => ({ title: `Serviço ${index + 1}`, keys: [`service.${index + 1}.title`, `service.${index + 1}.text`] })),
+  { title: 'Sobre a AINAKA', keys: ['about.eyebrow','about.title1','about.title2','about.p1','about.p2','about.card1','about.card2','about.card3','about.card3text'] },
+  { title: 'Portfólio', keys: ['portfolio.eyebrow','portfolio.title','portfolio.description','project.1.type','project.2.type','project.3.type'] },
+  { title: 'Contato', keys: ['contact.eyebrow','contact.title1','contact.title2','contact.text','contact.whatsapp','contact.email','contact.instagram'] },
+  { title: 'Rodapé e faixa animada', keys: ['footer.text','marquee'] },
+]
+
+type CmsSettings = Record<string, string>
+const I18nContext = createContext<{ locale: Locale; setLocale: (locale: Locale) => void; t: (key: string) => string; settings: CmsSettings } | null>(null)
 
 export function I18nProvider({ children }: { children: ReactNode }) {
   const [locale, setLocale] = useState<Locale>(() => (localStorage.getItem('ainaka-locale') as Locale) || 'pt-BR')
+  const [overrides, setOverrides] = useState<Partial<Record<Locale, Record<string, string>>>>({})
+  const [settings, setSettings] = useState<CmsSettings>({})
   useEffect(() => { localStorage.setItem('ainaka-locale', locale); document.documentElement.lang = locale }, [locale])
-  const t = (key: string) => translations[locale][key] ?? translations['pt-BR'][key] ?? key
-  return <I18nContext.Provider value={{ locale, setLocale, t }}>{children}</I18nContext.Provider>
+  useEffect(() => {
+    fetch('/api/content').then((response) => response.ok ? response.json() : Promise.reject()).then((data: { content: { locale: Locale; key: string; value: string }[]; settings: CmsSettings }) => {
+      const next: Partial<Record<Locale, Record<string, string>>> = {}
+      for (const item of data.content) (next[item.locale] ??= {})[item.key] = item.value
+      setOverrides(next); setSettings(data.settings ?? {})
+    }).catch(() => undefined)
+  }, [])
+  useEffect(() => {
+    if (!settings.faviconUrl) return
+    const favicon = document.querySelector<HTMLLinkElement>('link[rel="icon"]')
+    if (favicon) favicon.href = settings.faviconUrl
+  }, [settings.faviconUrl])
+  const t = (key: string) => overrides[locale]?.[key] ?? defaultTranslations[locale][key] ?? defaultTranslations['pt-BR'][key] ?? key
+  return <I18nContext.Provider value={{ locale, setLocale, t, settings }}>{children}</I18nContext.Provider>
 }
 
 export function useI18n() {

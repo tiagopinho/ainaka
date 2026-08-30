@@ -56,6 +56,9 @@ body {
   overflow-x: hidden;
 }
 
+.admin-input { margin-top: .5rem; width: 100%; border-radius: .75rem; border: 1px solid rgba(255,255,255,.1); background: rgba(0,0,0,.3); padding: .75rem 1rem; color: white; outline: none; }
+.admin-input:focus { border-color: var(--color-neon-purple); }
+
 ::selection {
   background: var(--color-neon-purple);
   color: white;

@@ -1,13 +1,16 @@
+import { useI18n } from '../i18n/I18nContext'
+
 interface LogoProps {
   className?: string
   iconOnly?: boolean
 }
 
 export default function Logo({ className = "", iconOnly = false }: LogoProps) {
+  const { settings } = useI18n()
   return (
     <div className={`flex items-center ${className}`}>
       <img
-        src={iconOnly ? '/ainaka-symbol.png' : '/ainaka-logo-horizontal.png'}
+        src={iconOnly ? (settings.symbolUrl || '/ainaka-symbol.png') : (settings.logoUrl || '/ainaka-logo-horizontal.png')}
         alt={iconOnly ? '' : 'AINAKA'}
         aria-hidden={iconOnly}
         className={iconOnly
