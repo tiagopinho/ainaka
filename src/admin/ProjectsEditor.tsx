@@ -1,6 +1,8 @@
 import { useState, type ChangeEvent, type FormEvent } from 'react'
 import { ImageUp, Pencil, Plus, Save, Trash2, X } from 'lucide-react'
-import { localeOptions, type Locale } from '../i18n/I18nContext'
+import { localeOptions as languages, type Locale } from '../i18n/I18nContext'
+
+const localeOptions = languages.map((option) => ({ ...option, label: '' }))
 
 type Translation = { category: string; description: string }
 export type Project = { id: number; name: string; slug: string; coverUrl?: string | null; galleryUrls: string[]; websiteUrl?: string | null; technologies: string[]; translations: Partial<Record<Locale, Translation>>; published: boolean; featured: boolean; sortOrder: number }
