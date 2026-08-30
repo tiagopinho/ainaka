@@ -24,7 +24,7 @@ function Login({ onSuccess }: { onSuccess: () => void }) {
 export default function AdminApp() {
   const [authenticated, setAuthenticated] = useState<boolean | null>(null); const [projects, setProjects] = useState<Project[]>([]); const [tab, setTab] = useState<Tab>('projects'); const [notice, setNotice] = useState('')
   const reload = async () => setProjects(await api<Project[]>('/api/projects'))
-  useEffect(() => { api<{ authenticated: boolean }>('/api/auth').then(async (data) => { setAuthenticated(data.authenticated); if (data.authenticated) await reload() }).catch(() => setAuthenticated(false)) }, [])
+  useEffect(() => { api<{ authenticated: boolean }>(`/api/auth?t=${Date.now()}`, { cache: 'no-store' }).then(async (data) => { setAuthenticated(data.authenticated); if (data.authenticated) await reload() }).catch(() => setAuthenticated(false)) }, [])
   if (authenticated === null) return <div className="flex min-h-screen items-center justify-center text-white/50">Carregando…</div>
   if (!authenticated) return <Login onSuccess={() => setAuthenticated(true)} />
   const nav = [{ id: 'projects' as const, label: 'Projetos', Icon: LayoutDashboard }, { id: 'content' as const, label: 'Conteúdo', Icon: Settings2 }, { id: 'brand' as const, label: 'Marca e contatos', Icon: Palette }, { id: 'users' as const, label: 'Usuários', Icon: Users }]

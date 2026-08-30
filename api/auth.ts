@@ -6,8 +6,9 @@ import { adminUsers } from '../src/db/schema.js'
 
 export default {
   async fetch(request: Request) {
-    if (request.method === 'GET') return Response.json({ authenticated: await isAuthenticated(request) })
-    if (request.method === 'DELETE') return Response.json({ ok: true }, { headers: { 'Set-Cookie': clearSessionCookie() } })
+    const noCache = { 'Cache-Control': 'private, no-store, no-cache, max-age=0', 'Vary': 'Cookie' }
+    if (request.method === 'GET') return Response.json({ authenticated: await isAuthenticated(request) }, { headers: noCache })
+    if (request.method === 'DELETE') return Response.json({ ok: true }, { headers: { ...noCache, 'Set-Cookie': clearSessionCookie() } })
     if (request.method !== 'POST') return new Response('Method not allowed', { status: 405 })
     const { email, password } = await request.json() as { email?: string; password?: string }
     if (!email || !password) return Response.json({ error: 'Credenciais inválidas' }, { status: 401 })
@@ -23,6 +24,6 @@ export default {
     }
     if (!valid) return Response.json({ error: 'Credenciais inválidas' }, { status: 401 })
     const token = await createSession()
-    return Response.json({ ok: true }, { headers: { 'Set-Cookie': sessionCookie(token) } })
+    return Response.json({ ok: true }, { headers: { ...noCache, 'Set-Cookie': sessionCookie(token) } })
   },
 }
