@@ -1,0 +1,25 @@
+import { useEffect, useState, type FormEvent } from 'react'
+import { KeyRound, Plus, Save, Trash2, UserCheck, UserX } from 'lucide-react'
+
+type AdminUser = { id: number; name: string; email: string; active: boolean; createdAt: string }
+
+async function request<T>(url: string, init?: RequestInit): Promise<T> {
+  const response = await fetch(url, { credentials: 'include', ...init, headers: { 'Content-Type': 'application/json', ...init?.headers } })
+  const data = await response.json()
+  if (!response.ok) throw new Error(data.error ?? 'Não foi possível concluir a operação.')
+  return data
+}
+
+export default function UsersEditor({ setNotice }: { setNotice: (message: string) => void }) {
+  const [users, setUsers] = useState<AdminUser[]>([])
+  const load = () => request<AdminUser[]>('/api/users').then(setUsers).catch((reason) => setNotice(reason instanceof Error ? reason.message : 'Erro ao carregar usuários.'))
+  useEffect(() => { request<AdminUser[]>('/api/users').then(setUsers).catch((reason) => setNotice(reason instanceof Error ? reason.message : 'Erro ao carregar usuários.')) }, [setNotice])
+  async function create(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault(); const formElement = event.currentTarget; const form = new FormData(formElement); setNotice('Criando usuário…')
+    try { await request('/api/users', { method: 'POST', body: JSON.stringify({ name: form.get('name'), email: form.get('email'), password: form.get('password') }) }); formElement.reset(); await load(); setNotice('Administrador criado com sucesso.') } catch (reason) { setNotice(reason instanceof Error ? reason.message : 'Erro ao criar usuário.') }
+  }
+  async function toggle(user: AdminUser) { try { await request(`/api/users?id=${user.id}`, { method: 'PUT', body: JSON.stringify({ active: !user.active }) }); await load(); setNotice(user.active ? 'Usuário desativado.' : 'Usuário ativado.') } catch (reason) { setNotice(reason instanceof Error ? reason.message : 'Erro.') } }
+  async function resetPassword(user: AdminUser) { const password = window.prompt(`Digite a nova senha para ${user.name} (mínimo de 10 caracteres):`); if (!password) return; try { await request(`/api/users?id=${user.id}`, { method: 'PUT', body: JSON.stringify({ password }) }); setNotice('Senha atualizada.') } catch (reason) { setNotice(reason instanceof Error ? reason.message : 'Erro.') } }
+  async function remove(user: AdminUser) { if (!window.confirm(`Excluir o acesso de ${user.name}?`)) return; try { await request(`/api/users?id=${user.id}`, { method: 'DELETE' }); await load(); setNotice('Usuário excluído.') } catch (reason) { setNotice(reason instanceof Error ? reason.message : 'Erro.') } }
+  return <div><h1 className="font-display text-3xl font-bold">Administradores</h1><p className="mt-2 text-sm text-white/50">Controle quem pode acessar e alterar o painel.</p><div className="mt-7 grid gap-5 xl:grid-cols-[1fr_360px]"><div className="space-y-3">{users.length === 0 && <div className="glass-panel rounded-2xl p-8 text-center text-sm text-white/40">Ainda não existem usuários cadastrados no banco. Seu acesso principal da Vercel continua funcionando.</div>}{users.map((user) => <article key={user.id} className="glass-panel flex flex-col gap-4 rounded-2xl p-5 sm:flex-row sm:items-center"><div className={`flex h-11 w-11 items-center justify-center rounded-xl ${user.active ? 'bg-emerald-400/10 text-emerald-300' : 'bg-white/5 text-white/30'}`}>{user.active ? <UserCheck size={20} /> : <UserX size={20} />}</div><div className="min-w-0 flex-1"><strong className="block truncate">{user.name}</strong><span className="block truncate text-xs text-white/40">{user.email}</span></div><div className="flex gap-2"><button onClick={() => resetPassword(user)} className="rounded-lg border border-white/10 p-2 text-white/50 hover:text-white" title="Trocar senha"><KeyRound size={17} /></button><button onClick={() => toggle(user)} className="rounded-lg border border-white/10 px-3 py-2 text-xs text-white/60">{user.active ? 'Desativar' : 'Ativar'}</button><button onClick={() => remove(user)} className="rounded-lg border border-red-400/10 p-2 text-red-300/60 hover:text-red-300" title="Excluir"><Trash2 size={17} /></button></div></article>)}</div><form onSubmit={create} className="glass-panel h-fit rounded-2xl p-6"><h2 className="flex items-center gap-2 font-display text-xl font-semibold"><Plus size={19} /> Novo administrador</h2><label className="mt-4 block text-xs text-white/50">Nome<input name="name" required className="admin-input" /></label><label className="mt-4 block text-xs text-white/50">E-mail<input name="email" type="email" required className="admin-input" /></label><label className="mt-4 block text-xs text-white/50">Senha inicial<input name="password" type="password" required minLength={10} className="admin-input" /><span className="mt-1 block text-[10px] text-white/30">Mínimo de 10 caracteres.</span></label><button className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-white px-4 py-3 text-sm font-semibold text-void"><Save size={16} /> Criar acesso</button></form></div></div>
+}
