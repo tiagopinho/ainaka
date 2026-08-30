@@ -1,8 +1,9 @@
 import { useState, type ChangeEvent, type FormEvent } from 'react'
 import { ImageUp, Pencil, Plus, Save, Trash2, X } from 'lucide-react'
 import { localeOptions as languages, type Locale } from '../i18n/I18nContext'
+import FlagIcon from '../components/FlagIcon'
 
-const localeOptions = languages.map((option) => ({ ...option, label: '' }))
+const localeOptions = languages.map((option) => ({ ...option, label: '', flag: <FlagIcon locale={option.code} className="h-6 w-9 rounded-sm shadow" /> }))
 
 type Translation = { category: string; description: string }
 export type Project = { id: number; name: string; slug: string; coverUrl?: string | null; galleryUrls: string[]; websiteUrl?: string | null; technologies: string[]; translations: Partial<Record<Locale, Translation>>; published: boolean; featured: boolean; sortOrder: number }

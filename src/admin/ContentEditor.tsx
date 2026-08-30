@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Save } from 'lucide-react'
 import { contentSections, defaultTranslations, localeOptions as languages, type Locale } from '../i18n/I18nContext'
+import FlagIcon from '../components/FlagIcon'
 
-const localeOptions = languages.map((option) => ({ ...option, label: '' }))
+const localeOptions = languages.map((option) => ({ ...option, label: '', flag: <FlagIcon locale={option.code} className="h-5 w-8 rounded-sm shadow" /> }))
 
 type ContentRow = { locale: Locale; key: string; value: string }
 type AllValues = Record<Locale, Record<string, string>>

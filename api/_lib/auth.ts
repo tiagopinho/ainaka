@@ -1,6 +1,6 @@
 import { jwtVerify, SignJWT } from 'jose'
 
-const cookieName = 'ainaka_admin_session'
+const cookieName = '__Host-ainaka_admin_session'
 const secret = () => {
   if (!process.env.SESSION_SECRET || process.env.SESSION_SECRET.length < 32) throw new Error('SESSION_SECRET inválido')
   return new TextEncoder().encode(process.env.SESSION_SECRET)
@@ -18,10 +18,9 @@ export async function isAuthenticated(request: Request) {
 }
 
 export function sessionCookie(token: string) {
-  return `${cookieName}=${token}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=28800`
+  return `${cookieName}=${token}; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=604800`
 }
 
 export function clearSessionCookie() {
-  return `${cookieName}=; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=0`
+  return `${cookieName}=; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=0`
 }
-
