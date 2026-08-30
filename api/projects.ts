@@ -15,18 +15,20 @@ export default {
     if (!await isAuthenticated(request)) return Response.json({ error: 'Não autorizado' }, { status: 401 })
     if (request.method === 'POST') {
       const body = await request.json() as typeof projects.$inferInsert
-      const [created] = await db.insert(projects).values(body).returning()
+      const [created] = await db.insert(projects).values({ ...body, slug: body.slug.trim().toLowerCase() }).returning()
       return Response.json(created, { status: 201 })
     }
     const id = Number(url.searchParams.get('id'))
     if (!Number.isInteger(id)) return Response.json({ error: 'ID inválido' }, { status: 400 })
     if (request.method === 'PUT') {
       const body = await request.json() as Partial<typeof projects.$inferInsert>
-      const [updated] = await db.update(projects).set({ ...body, updatedAt: new Date() }).where(eq(projects.id, id)).returning()
+      const { id: _id, createdAt: _createdAt, ...changes } = body
+      void _id; void _createdAt
+      if (changes.slug) changes.slug = changes.slug.trim().toLowerCase()
+      const [updated] = await db.update(projects).set({ ...changes, updatedAt: new Date() }).where(eq(projects.id, id)).returning()
       return Response.json(updated)
     }
     if (request.method === 'DELETE') { await db.delete(projects).where(eq(projects.id, id)); return Response.json({ ok: true }) }
     return new Response('Method not allowed', { status: 405 })
   },
 }
-

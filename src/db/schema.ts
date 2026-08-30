@@ -29,6 +29,7 @@ export const projects = pgTable('projects', {
   slug: text('slug').notNull().unique(),
   name: text('name').notNull(),
   coverUrl: text('cover_url'),
+  galleryUrls: jsonb('gallery_urls').$type<string[]>().default([]).notNull(),
   websiteUrl: text('website_url'),
   technologies: jsonb('technologies').$type<string[]>().default([]).notNull(),
   translations: jsonb('translations').$type<Record<string, { category: string; description: string }>>().default({}).notNull(),

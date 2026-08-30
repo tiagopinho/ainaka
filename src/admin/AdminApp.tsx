@@ -1,11 +1,11 @@
 import { useEffect, useState, type FormEvent } from 'react'
-import { ImageUp, LayoutDashboard, LogOut, Palette, Plus, Save, Settings2, Users } from 'lucide-react'
+import { LayoutDashboard, LogOut, Palette, Settings2, Users } from 'lucide-react'
 import Logo from '../components/Logo'
 import BrandEditor from './BrandEditor'
 import ContentEditor from './ContentEditor'
 import UsersEditor from './UsersEditor'
+import ProjectsEditor, { type Project } from './ProjectsEditor'
 
-type Project = { id: number; name: string; slug: string; coverUrl?: string; published: boolean; featured: boolean; websiteUrl?: string }
 type Tab = 'projects' | 'content' | 'brand' | 'users'
 
 async function api<T>(url: string, init?: RequestInit): Promise<T> {
@@ -19,11 +19,6 @@ function Login({ onSuccess }: { onSuccess: () => void }) {
   const [error, setError] = useState(''); const [loading, setLoading] = useState(false)
   async function submit(event: FormEvent<HTMLFormElement>) { event.preventDefault(); setLoading(true); setError(''); const form = new FormData(event.currentTarget); try { await api('/api/auth', { method: 'POST', body: JSON.stringify({ email: form.get('email'), password: form.get('password') }) }); onSuccess() } catch (reason) { setError(reason instanceof Error ? reason.message : 'Falha no acesso') } finally { setLoading(false) } }
   return <main className="flex min-h-screen items-center justify-center px-5"><form onSubmit={submit} className="glass-panel glow-border w-full max-w-md rounded-3xl p-8"><Logo /><h1 className="mt-10 font-display text-3xl font-bold">Painel administrativo</h1><p className="mt-2 text-sm text-white/50">Entre com suas credenciais de administrador.</p><label className="mt-8 block text-xs text-white/50">E-mail<input name="email" type="email" required className="admin-input" /></label><label className="mt-4 block text-xs text-white/50">Senha<input name="password" type="password" required className="admin-input" /></label>{error && <p className="mt-4 text-sm text-red-300">{error}</p>}<button disabled={loading} className="mt-6 w-full rounded-xl bg-gradient-to-r from-neon-blue to-neon-pink px-5 py-3 font-semibold disabled:opacity-50">{loading ? 'Entrando…' : 'Entrar'}</button></form></main>
-}
-
-function ProjectsEditor({ projects, reload, setNotice }: { projects: Project[]; reload: () => Promise<void>; setNotice: (message: string) => void }) {
-  async function create(event: FormEvent<HTMLFormElement>) { event.preventDefault(); const formElement = event.currentTarget; const form = new FormData(formElement); setNotice('Salvando…'); try { await api('/api/projects', { method: 'POST', body: JSON.stringify({ name: form.get('name'), slug: form.get('slug'), websiteUrl: form.get('websiteUrl') || null, published: form.get('published') === 'on', featured: form.get('featured') === 'on', translations: {}, technologies: [] }) }); formElement.reset(); await reload(); setNotice('Projeto criado.') } catch (reason) { setNotice(reason instanceof Error ? reason.message : 'Erro') } }
-  return <div><h1 className="font-display text-3xl font-bold">Projetos</h1><p className="mt-2 text-sm text-white/50">Cadastre os trabalhos que aparecerão no portfólio.</p><div className="mt-7 grid gap-5 xl:grid-cols-[1fr_360px]"><div className="space-y-3">{projects.length === 0 && <div className="glass-panel rounded-2xl p-8 text-center text-sm text-white/40">Nenhum projeto cadastrado.</div>}{projects.map((project) => <div key={project.id} className="glass-panel flex items-center gap-4 rounded-2xl p-4">{project.coverUrl ? <img src={project.coverUrl} alt="" className="h-16 w-20 rounded-lg object-cover" /> : <div className="flex h-16 w-20 items-center justify-center rounded-lg bg-white/5"><ImageUp className="text-white/20" /></div>}<div className="flex-1"><strong>{project.name}</strong><p className="text-xs text-white/40">/{project.slug}</p></div><span className={`rounded-full px-3 py-1 text-xs ${project.published ? 'bg-emerald-400/10 text-emerald-300' : 'bg-white/5 text-white/40'}`}>{project.published ? 'Publicado' : 'Rascunho'}</span></div>)}</div><form onSubmit={create} className="glass-panel h-fit rounded-2xl p-6"><h2 className="flex items-center gap-2 font-display text-xl font-semibold"><Plus size={19} /> Novo projeto</h2><label className="mt-4 block text-xs text-white/50">Nome<input name="name" required className="admin-input" /></label><label className="mt-4 block text-xs text-white/50">Identificador (ex.: site-cliente)<input name="slug" required className="admin-input" /></label><label className="mt-4 block text-xs text-white/50">Link do projeto<input name="websiteUrl" type="url" className="admin-input" /></label><div className="mt-4 flex gap-5 text-xs text-white/60"><label><input name="published" type="checkbox" className="mr-2" />Publicado</label><label><input name="featured" type="checkbox" className="mr-2" />Destaque</label></div><button className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-white px-4 py-3 text-sm font-semibold text-void"><Save size={16} /> Salvar projeto</button></form></div></div>
 }
 
 export default function AdminApp() {
