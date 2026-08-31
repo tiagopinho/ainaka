@@ -23,6 +23,7 @@ export default function Navbar() {
         <a href="#inicio" aria-label="AINAKA — início"><Logo /></a>
         <div className="hidden items-center gap-8 md:flex">
           {links.map(([key, href]) => <a key={href} href={href} className="text-sm text-white/65 transition hover:text-white">{t(key)}</a>)}
+          <a href="/briefing" className="text-sm text-white/65 transition hover:text-white">Briefing</a>
           <div className="relative">
             <button onClick={() => setLanguageOpen(!languageOpen)} className="flex items-center gap-2 rounded-full border border-white/10 px-3 py-2 text-xs text-white/75 transition hover:border-neon-purple/50" aria-label={t('nav.language')} aria-expanded={languageOpen}><span className="text-base">{activeLocale.flag}</span>{activeLocale.short}<ChevronDown size={13} /></button>
             {languageOpen && <div className="glass-panel absolute right-0 top-12 w-64 rounded-2xl p-2 shadow-2xl">{localeOptions.map((option) => <button key={option.code} onClick={() => { setLocale(option.code); setLanguageOpen(false) }} className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm text-white/75 hover:bg-white/10"><span className="text-xl">{option.flag}</span><span className="flex-1">{option.label}</span>{locale === option.code && <Check size={15} className="text-neon-cyan" />}</button>)}</div>}
@@ -36,6 +37,7 @@ export default function Navbar() {
       {languageOpen && <div className="glass-panel absolute right-5 top-[4.5rem] w-64 rounded-2xl p-2 shadow-2xl md:hidden">{localeOptions.map((option) => <button key={option.code} onClick={() => { setLocale(option.code); setLanguageOpen(false) }} className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm text-white/75 hover:bg-white/10"><span className="text-xl">{option.flag}</span><span className="flex-1">{option.label}</span>{locale === option.code && <Check size={15} className="text-neon-cyan" />}</button>)}</div>}
       {open && <div className="glass-panel mx-4 mb-4 flex flex-col gap-1 rounded-2xl p-3 md:hidden">
         {links.map(([key, href]) => <a key={href} href={href} onClick={() => setOpen(false)} className="rounded-xl px-4 py-3 text-sm text-white/75 hover:bg-white/5">{t(key)}</a>)}
+        <a href="/briefing" className="rounded-xl px-4 py-3 text-sm text-white/75 hover:bg-white/5">Briefing</a>
       </div>}
     </header>
   )

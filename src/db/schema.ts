@@ -10,6 +10,19 @@ export const adminUsers = pgTable('admin_users', {
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 })
 
+export const briefings = pgTable('briefings', {
+  id: serial('id').primaryKey(),
+  contactName: text('contact_name').notNull(),
+  companyName: text('company_name').notNull(),
+  email: text('email').notNull(),
+  whatsapp: text('whatsapp').notNull(),
+  status: text('status').default('new').notNull(),
+  answers: jsonb('answers').$type<Record<string, unknown>>().notNull(),
+  internalNotes: text('internal_notes').default('').notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+})
+
 export const siteContent = pgTable('site_content', {
   id: serial('id').primaryKey(),
   locale: text('locale').notNull(),

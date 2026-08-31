@@ -8,9 +8,11 @@ import Contact from './components/Contact'
 import Footer from './components/Footer'
 import { useI18n } from './i18n/I18nContext'
 import AdminApp from './admin/AdminApp'
+import BriefingPage from './components/BriefingPage'
 
 export default function App() {
   const { t } = useI18n()
   if (window.location.pathname.startsWith('/admin')) return <AdminApp />
+  if (window.location.pathname.startsWith('/briefing')) return <BriefingPage />
   return <div className="relative"><BackgroundFX /><Navbar /><main><Hero /><div className="marquee-shell" aria-hidden="true"><div className="marquee-track">{t('marquee').repeat(2)}</div></div><Services /><About /><Portfolio /><Contact /></main><Footer /></div>
 }
